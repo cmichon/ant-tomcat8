@@ -1,0 +1,40 @@
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="" default="run">
+  <!--property file="proxy.properties"/>
+  <setproxy proxyhost="${proxyhost}" proxyport="${proxyport}" proxyuser="${proxyuser}" proxypassword="${proxypass}"/-->
+  <target name="retrieve">
+    <ivy:retrieve/>
+    <get dest="." usetimestamp="true" skipexisting="true">
+      <url url="http://apache.mindstudios.com/tomcat/tomcat-8/v8.0.37/bin/apache-tomcat-8.0.37.zip"/>
+    </get>
+  </target>
+  <target name="run" depends="retrieve">
+    <unzip src="apache-tomcat-8.0.37.zip" dest="." overwrite="false">
+      <patternset>
+        <include name="apache-tomcat-8.0.37/conf/**/*"/>
+        <include name="apache-tomcat-8.0.37/webapps/host-manager/**/*"/>
+        <include name="apache-tomcat-8.0.37/webapps/manager/**/*"/>
+        <include name="apache-tomcat-8.0.37/webapps/ROOT/**/*"/>
+      </patternset>
+      <mapper>
+        <globmapper from="apache-tomcat-8.0.37/*" to="*"/>
+      </mapper>
+    </unzip>
+    <copy file="tomcat-users.xml" todir="conf"/>
+    <java classname="org.apache.catalina.startup.Bootstrap" classpath="lib/*" maxmemory="1G" fork="true">
+      <jvmarg value="-Djava.util.logging.config.file=conf/logging.properties"/>
+      <jvmarg value="-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager"/>
+      <jvmarg value="-Dcatalina.base=."/>
+      <jvmarg value="-Dcatalina.home=."/>
+      <arg value="start"/>
+    </java>
+  </target>
+  <target name="clean">
+    <delete includeemptydirs="true" quiet="true">
+      <fileset dir="conf"/>
+      <fileset dir="lib"/>
+      <fileset dir="logs"/>
+      <fileset dir="webapps"/>
+      <fileset dir="work"/>
+    </delete>
+  </target>
+</project>
